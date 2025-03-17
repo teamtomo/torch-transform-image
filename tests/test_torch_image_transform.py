@@ -1,5 +1,5 @@
 import torch
-from torch_image_transform import affine_transform_image_2d, affine_transform_image_3d
+from torch_transform_image import affine_transform_image_2d, affine_transform_image_3d
 from torch_affine_utils.transforms_2d import T as T_2d
 from torch_affine_utils.transforms_3d import T as T_3d
 
@@ -19,7 +19,7 @@ def test_affine_transform_image_2d():
     # sample
     result = affine_transform_image_2d(image, M, interpolation='bicubic')
 
-    # sanity check
+    # sanity check, array center which was 4 voxels below the dot should now be 1
     assert result.shape == image.shape
     assert result[14, 14] == 1
     assert result[18, 14] == 0
@@ -40,7 +40,7 @@ def test_affine_transform_image_3d():
     # sample
     result = affine_transform_image_3d(image, M, interpolation='trilinear')
 
-    # sanity check, center should now be 1
+    # sanity check, array center which was 4 voxels below the dot should now be 1
     assert result.shape == image.shape
     assert result[14, 14, 14] == 1
     assert result[18, 14, 14] == 0

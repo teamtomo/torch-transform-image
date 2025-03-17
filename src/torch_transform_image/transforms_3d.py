@@ -22,7 +22,7 @@ def affine_transform_image_3d(
     grid = homogenise_coordinates(grid)  # (d, h, w, zyxw)
     grid = einops.rearrange(grid, 'd h w zyxw -> d h w zyxw 1')
     grid = matrices @ grid
-    grid = grid[..., :3, 0]  # dehomogenise coordinates: (d, h, w, zyxw, 1) -> (d, h, w, zyx)
+    grid = grid[..., :3, 0]  # dehomogenise coordinates: (..., d, h, w, zyxw, 1) -> (..., d, h, w, zyx)
 
     # sample image at transformed positions
     result = sample_image_3d(image, coordinates=grid, interpolation=interpolation)

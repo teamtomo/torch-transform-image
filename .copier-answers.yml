@@ -5,7 +5,7 @@ author_email: alisterburt@gmail.com
 author_name: Alister Burt
 github_username: teamtomo
 mode: simple
-module_name: torch_image_transform
-project_name: torch-image-transform
+module_name: torch_transform_image
+project_name: torch-transform-image
 project_short_description: Real space transformations of 2D/3D images in PyTorch
 

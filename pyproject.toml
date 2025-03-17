@@ -11,7 +11,7 @@ sources = ["src"]
 
 # https://peps.python.org/pep-0621/
 [project]
-name = "torch-image-transform"
+name = "torch-transform-image"
 version = "0.1.0"
 description = "Real space transformations of 2D/3D images in PyTorch"
 readme = "README.md"
@@ -51,17 +51,17 @@ dev = [
 ]
 
 [project.urls]
-homepage = "https://github.com/teamtomo/torch-image-transform"
-repository = "https://github.com/teamtomo/torch-image-transform"
+homepage = "https://github.com/teamtomo/torch-transform-image"
+repository = "https://github.com/teamtomo/torch-transform-image"
 
 # Entry points
 # https://peps.python.org/pep-0621/#entry-points
 # same as console_scripts entry point
 # [project.scripts]
-# torch-image-transform-cli = "torch_image_transform:main_cli"
+# torch-transform-image-cli = "torch_transform_image:main_cli"
 
 # [project.entry-points."some.group"]
-# tomatoes = "torch_image_transform:main_tomatoes"
+# tomatoes = "torch_transform_image:main_tomatoes"
 
 
 
@@ -85,7 +85,7 @@ exclude_lines = [
 ]
 
 [tool.coverage.run]
-source = ["torch_image_transform"]
+source = ["torch_transform_image"]
 
 # https://github.com/mgedmin/check-manifest#configuration
 # add files that you want check-manifest to explicitly ignore here

@@ -1,4 +1,4 @@
-* torch-image-transform version:
+* torch-transform-image version:
 * Python version:
 * Operating System:
 
