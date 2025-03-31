@@ -8,12 +8,19 @@ from torch_image_interpolation import sample_image_3d
 
 
 def affine_transform_image_3d(
-    image: torch.Tensor,
-    matrices: torch.Tensor,
-    interpolation: Literal['nearest', 'trilinear']
+        image: torch.Tensor,
+        matrices: torch.Tensor,
+        interpolation: Literal['nearest', 'trilinear'],
+        zyx_matrices: bool = False,
 ) -> torch.Tensor:
     # grab image dimensions
     d, h, w = image.shape[-3:]
+
+    if not zyx_matrices:
+        matrices[..., :3, :3] = (
+            torch.flip(matrices[..., :3, :3], dims=(-2, -1))
+        )
+        matrices[..., :3, 3] = torch.flip(matrices[..., :3, 3], dims=(-1,))
 
     # generate grid of pixel coordinates
     grid = coordinate_grid(image_shape=(d, h, w), device=image.device)

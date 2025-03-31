@@ -17,7 +17,9 @@ def test_affine_transform_image_2d():
     M = T_2d([4, 0])  # move coordinates up 4 in h dim
 
     # sample
-    result = affine_transform_image_2d(image, M, interpolation='bicubic')
+    result = affine_transform_image_2d(
+        image, M, interpolation='bicubic', yx_matrices=True,
+    )
 
     # sanity check, array center which was 4 voxels below the dot should now be 1
     assert result.shape == image.shape
@@ -38,7 +40,9 @@ def test_affine_transform_image_3d():
     M = T_3d([4, 0, 0])  # move coordinates up 4 in d dim
 
     # sample
-    result = affine_transform_image_3d(image, M, interpolation='trilinear')
+    result = affine_transform_image_3d(
+        image, M, interpolation='trilinear', zyx_matrices=True,
+    )
 
     # sanity check, array center which was 4 voxels below the dot should now be 1
     assert result.shape == image.shape
