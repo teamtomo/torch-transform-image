@@ -64,13 +64,14 @@ translation = T([4, 0])  # Uses [y, x] coordinate order matching dimensions (h, 
 result = affine_transform_image_2d(
     image=image,
     matrices=translation, 
-    interpolation='bilinear'  # Options: 'nearest', 'bilinear', 'bicubic'
+    interpolation='bilinear',  # Options: 'nearest', 'bilinear', 'bicubic'
+    yx_matrices=True,  # The generated translations have [y, x] order
 )
 
 # Compose multiple transformations
 # First translate to origin, then rotate, then translate back
 T1 = T([-14, -14])  # Move center to origin
-R1 = R(45)  # Rotate 45 degrees
+R1 = R(45, yx=True)  # Rotate 45 degrees
 T2 = T([14, 14])  # Move back
 transform = T2 @ R1 @ T1  # Matrix composition (applied right-to-left)
 
@@ -78,7 +79,8 @@ transform = T2 @ R1 @ T1  # Matrix composition (applied right-to-left)
 rotated = affine_transform_image_2d(
     image=image,
     matrices=transform,
-    interpolation='bicubic'
+    interpolation='bicubic',
+    yx_matrices=True,
 )
 ```
 
@@ -100,7 +102,8 @@ translation = T([5, 0, 0])  # Uses [z, y, x] coordinate order matching dimension
 result = affine_transform_image_3d(
     image=volume,
     matrices=translation, 
-    interpolation='trilinear'  # Options: 'nearest', 'trilinear'
+    interpolation='trilinear',  # Options: 'nearest', 'trilinear'
+    zyx_matrices=True,  # The generated translations have [z, y, x] order
 )
 ```
 
