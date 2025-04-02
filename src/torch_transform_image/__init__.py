@@ -1,6 +1,11 @@
 """Real space transformations of 2D/3D images in PyTorch"""
 
-__version__ = '0.1.0'
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("torch-transform-image")
+except PackageNotFoundError:
+    __version__ = "uninstalled"
 __author__ = "Alister Burt"
 __email__ = "alisterburt@gmail.com"
 
