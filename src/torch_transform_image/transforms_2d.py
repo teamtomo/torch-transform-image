@@ -55,4 +55,5 @@ def shift_rotate_image_2d(
         image=image,
         matrices=matrices,
         interpolation=interpolation_mode,
+        yx_matrices=True,
     )

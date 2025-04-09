@@ -1,5 +1,6 @@
 import torch
 from torch_transform_image import affine_transform_image_2d, affine_transform_image_3d
+from torch_transform_image import shift_rotate_image_2d
 from torch_affine_utils.transforms_2d import T as T_2d
 from torch_affine_utils.transforms_3d import T as T_3d
 
@@ -18,7 +19,10 @@ def test_affine_transform_image_2d():
 
     # sample
     result = affine_transform_image_2d(
-        image, M, interpolation='bicubic', yx_matrices=True,
+        image,
+        M,
+        interpolation="bicubic",
+        yx_matrices=True,
     )
 
     # sanity check, array center which was 4 voxels below the dot should now be 1
@@ -41,10 +45,31 @@ def test_affine_transform_image_3d():
 
     # sample
     result = affine_transform_image_3d(
-        image, M, interpolation='trilinear', zyx_matrices=True,
+        image,
+        M,
+        interpolation="trilinear",
+        zyx_matrices=True,
     )
 
     # sanity check, array center which was 4 voxels below the dot should now be 1
     assert result.shape == image.shape
     assert result[14, 14, 14] == 1
     assert result[18, 14, 14] == 0
+
+
+def test_shift_rotate_image_2d():
+    image = torch.zeros((28, 28), dtype=torch.float32)
+    image[18, 14] = 1
+    image = image.float()
+
+    result = shift_rotate_image_2d(
+        image=image,
+        angles=90,
+        shifts=[4, 0],
+        interpolation_mode="bicubic",
+        rotate_first=True,
+    )
+
+    assert image[14, 14] == 0
+    assert result[14, 14] == 1
+    assert result[18, 14] == 0
