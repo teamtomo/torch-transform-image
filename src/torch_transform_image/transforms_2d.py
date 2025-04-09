@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 import einops
 import torch
@@ -11,10 +11,15 @@ def affine_transform_image_2d(
         image: torch.Tensor,
         matrices: torch.Tensor,
         interpolation: Literal['nearest', 'bilinear', 'bicubic'],
+        output_shape: Optional[tuple] = False,
         yx_matrices: bool = False,
 ) -> torch.Tensor:
     # grab image dimensions
-    h, w = image.shape[-2:]
+    if output_shape:
+        h, w = output_shape
+    else:
+        h, w = image.shape[-2:]
+
 
     if not yx_matrices:
         matrices[..., :2, :2] = (
