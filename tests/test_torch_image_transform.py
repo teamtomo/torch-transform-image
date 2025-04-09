@@ -42,7 +42,7 @@ def test_affine_transform_image_2d_scaling():
         output_shape=(56,56)
     )
 
-    # sanity check, array center which was 4 voxels below the dot should now be 1
+    # sanity check, array center which was 4 pixels below the dot should now be 1
     assert result.shape == (56,56)
     assert result[36, 28] == 1
     assert result[18, 14] == 0
