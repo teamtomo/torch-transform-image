@@ -11,7 +11,7 @@ def affine_transform_image_2d(
         image: torch.Tensor,
         matrices: torch.Tensor,
         interpolation: Literal['nearest', 'bilinear', 'bicubic'],
-        output_shape: Optional[tuple] = False,
+        output_shape: Optional[tuple] = None,
         yx_matrices: bool = False,
 ) -> torch.Tensor:
     # grab image dimensions
