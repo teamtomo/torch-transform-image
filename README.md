@@ -112,7 +112,7 @@ result = affine_transform_image_3d(
 Under the hood, the package:
 1. Creates a coordinate grid for the output image
 2. Applies the transformation matrix to these coordinates
-3. Samples the original image at the transformed coordinates using the specified interpolation method
+3. Samples the input image at the transformed coordinates using the specified interpolation method
 
 This can be unintuitive at times, in the 2D example above the dot will move to `[10,14]` in the output.
 If you want the input image to be transformed according to the matrix, you can use `torch.linalg.inv` to inverse the direction of the transform.
