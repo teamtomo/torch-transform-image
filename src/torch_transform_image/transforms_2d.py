@@ -44,21 +44,27 @@ def affine_transform_image_2d(
 
 def shift_rotate_image_2d(
     image: torch.Tensor,
-    angles: torch.Tensor | list[int | float] | int | float = 0,
-    shifts: torch.Tensor | list[int | float] | int | float = 0,
+    angle: torch.Tensor | int | float = 0,
+    shift: torch.Tensor | list[float | int] | int = 0,
     interpolation_mode: Literal["nearest", "bilinear", "bicubic"] = "bicubic",
     rotate_first: bool = True,
 ) -> torch.Tensor:
     """This is a wrapper function to simplify 2D rotation."""
     image_center = None
-    if angles:
+    if angle:
         h, w = image.shape[-2:]
         image_center = dft_center(
             image_shape=(h, w), device=image.device, fftshift=True, rfft=False
-        )
+            )
 
-    angle_tensor = torch.as_tensor(angles, device=image.device, dtype=torch.float32)
-    shift_tensor = torch.as_tensor(shifts, device=image.device, dtype=torch.float32)
+    angle_tensor = torch.as_tensor(angle, device=image.device, dtype=torch.float32)
+    shift_tensor = torch.as_tensor(shift, device=image.device, dtype=torch.float32)
+
+    if angle_tensor.numel() > 1 or shift_tensor.numel() > 2:
+        raise NotImplementedError(
+            "Only single angle and single shift values are supported."
+            )
+
     if rotate_first:
         matrices = T(shift_tensor) @ R(angle_tensor)
     else:
