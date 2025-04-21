@@ -66,9 +66,9 @@ def shift_rotate_image_2d(
             )
 
     if rotate_first:
-        matrices = T(shift_tensor) @ R(angle_tensor)
-    else:
         matrices = R(angle_tensor) @ T(shift_tensor)
+    else:
+        matrices = T(shift_tensor) @ R(angle_tensor)
     return affine_transform_image_2d(
         image=image,
         matrices=matrices,
