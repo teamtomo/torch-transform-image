@@ -59,17 +59,17 @@ def test_affine_transform_image_3d():
 
 def test_shift_rotate_image_2d():
     image = torch.zeros((28, 28), dtype=torch.float32)
-    image[18, 14] = 1
+    image[16, 14] = 1
     image = image.float()
 
     result = shift_rotate_image_2d(
         image=image,
-        angles=90,
-        shifts=[4, 0],
+        angles=180,
+        shifts=[-2, 0],
         interpolation_mode="bicubic",
         rotate_first=True,
     )
 
-    assert image[14, 14] == 0
-    assert result[14, 14] == 1
+    assert image[10, 14] == 0
+    assert result[10, 14] == 1
     assert result[18, 14] == 0
