@@ -15,4 +15,5 @@ from torch_transform_image.transforms_3d import affine_transform_image_3d
 __all__ = [
     'affine_transform_image_2d',
     'affine_transform_image_3d',
+    'shift_rotate_image_2d',
 ]
