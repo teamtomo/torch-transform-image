@@ -81,7 +81,7 @@ def test_rotate_shift_image_2d():
         image=image,
         angle=90,
         shift=[2, 0],
-        interpolation_mode="bicubic",
+        interpolation="bicubic",
         rotate_first=True,
     )
 
