@@ -74,22 +74,23 @@ def test_affine_transform_image_3d():
 
 def test_shift_rotate_image_2d():
     image = torch.zeros((28, 28), dtype=torch.float32)
-    image[16, 14] = 1
+    image[18, 14] = 1
     image = image.float()
 
     result = shift_rotate_image_2d(
         image=image,
-        angle=180,
-        shift=[-2, 0],
+        angle=90,
+        shift=[2, 0],
         interpolation_mode="bicubic",
         rotate_first=True,
     )
 
-    assert image[10, 14] == 0
-    assert result[10, 14] == 1
+    # sanity check, array center which was 4 voxels below the dot should now be 1
+    assert image[12, 12] == 0
+    assert result[12, 10] == 1
     assert result[18, 14] == 0
 
-    
+
 def test_affine_transform_image_3d_scaling():
     # set up test image with dot at (18, 14)
     image = torch.zeros((28, 28, 28), dtype=torch.float32)
@@ -109,4 +110,3 @@ def test_affine_transform_image_3d_scaling():
     assert result.shape == (56,56,56)
     assert result[36, 28, 28] == 1
     assert result[18, 14, 14] == 0
-

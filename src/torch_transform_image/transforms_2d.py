@@ -12,7 +12,6 @@ def affine_transform_image_2d(
         image: torch.Tensor,
         matrices: torch.Tensor,
         interpolation: Literal['nearest', 'bilinear', 'bicubic'],
-        image_center: torch.Tensor | tuple[float, ...] | None = None,
         output_shape: Optional[tuple] = None,
         yx_matrices: bool = False,
 ) -> torch.Tensor:
@@ -22,7 +21,6 @@ def affine_transform_image_2d(
     else:
         h, w = image.shape[-2:]
 
-
     if not yx_matrices:
         matrices[..., :2, :2] = (
             torch.flip(matrices[..., :2, :2], dims=(-2, -1))
@@ -30,7 +28,7 @@ def affine_transform_image_2d(
         matrices[..., :2, 2] = torch.flip(matrices[..., :2, 2], dims=(-1,))
 
     # generate grid of pixel coordinates
-    grid = coordinate_grid(image_shape=(h, w), center=image_center, device=image.device)
+    grid = coordinate_grid(image_shape=(h, w), device=image.device)
 
     # apply matrix to coordinates
     grid = homogenise_coordinates(grid)  # (h, w, yxw)
@@ -38,30 +36,28 @@ def affine_transform_image_2d(
     grid = matrices @ grid
     grid = grid[..., :2, 0]  # dehomogenise coordinates: (..., h, w, yxw, 1) -> (..., h, w, yx)
 
-    # shift image if correcting for center
-    if image_center is not None:
-        grid += image_center
-
     # sample image at transformed positions
     result = sample_image_2d(image, coordinates=grid, interpolation=interpolation)
     return result
 
 
-def shift_rotate_image_2d(
+def shift_rotate_image_2d(  # TODO: rename to rotate_shift_image_2d to match default order
     image: torch.Tensor,
     angle: torch.Tensor | int | float = 0,
     shift: torch.Tensor | list[float | int] | int = 0,
-    interpolation_mode: Literal["nearest", "bilinear", "bicubic"] = "bicubic",
+    interpolation_mode: Literal["nearest", "bilinear", "bicubic"] = "bicubic",  # TODO: rename to interpolation to match
     rotate_first: bool = True,
 ) -> torch.Tensor:
-    """This is a wrapper function to simplify 2D rotation."""
-    image_center = None
+    """This is a wrapper function to simplify 2D rotation."""  # TODO: add longer docstring
+    image_center = 0
     if angle:
         h, w = image.shape[-2:]
         image_center = dft_center(
             image_shape=(h, w), device=image.device, fftshift=True, rfft=False
             )
 
+    center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
+    inv_center_tensor = torch.as_tensor(-center_tensor, device=image.device, dtype=torch.float32)
     angle_tensor = torch.as_tensor(angle, device=image.device, dtype=torch.float32)
     shift_tensor = torch.as_tensor(shift, device=image.device, dtype=torch.float32)
 
@@ -71,13 +67,23 @@ def shift_rotate_image_2d(
             )
 
     if rotate_first:
-        matrices = R(angle_tensor) @ T(shift_tensor)
+        matrix = (
+            T(center_tensor) @
+            R(angle_tensor) @
+            T(shift_tensor) @
+            T(inv_center_tensor)
+        )
     else:
-        matrices = T(shift_tensor) @ R(angle_tensor)
+        matrix = (
+            T(center_tensor) @
+            T(shift_tensor) @
+            R(angle_tensor) @
+            T(inv_center_tensor)
+        )
+
     return affine_transform_image_2d(
         image=image,
-        matrices=matrices,
-        image_center=image_center,
+        matrices=matrix,
         interpolation=interpolation_mode,
         yx_matrices=True,
     )
