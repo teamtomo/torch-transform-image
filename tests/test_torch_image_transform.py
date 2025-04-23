@@ -1,6 +1,6 @@
 import torch
 from torch_transform_image import affine_transform_image_2d, affine_transform_image_3d
-from torch_transform_image import shift_rotate_image_2d
+from torch_transform_image import rotate_shift_image_2d
 from torch_affine_utils.transforms_2d import T as T_2d, S as S_2d
 from torch_affine_utils.transforms_3d import T as T_3d, S as S_3d
 
@@ -72,12 +72,12 @@ def test_affine_transform_image_3d():
     assert result[18, 14, 14] == 0
 
 
-def test_shift_rotate_image_2d():
+def test_rotate_shift_image_2d():
     image = torch.zeros((28, 28), dtype=torch.float32)
     image[18, 14] = 1
     image = image.float()
 
-    result = shift_rotate_image_2d(
+    result = rotate_shift_image_2d(
         image=image,
         angle=90,
         shift=[2, 0],

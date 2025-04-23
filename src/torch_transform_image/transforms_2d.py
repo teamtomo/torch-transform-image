@@ -41,7 +41,7 @@ def affine_transform_image_2d(
     return result
 
 
-def shift_rotate_image_2d(  # TODO: rename to rotate_shift_image_2d to match default order
+def rotate_shift_image_2d(
     image: torch.Tensor,
     angle: torch.Tensor | int | float = 0,
     shift: torch.Tensor | list[float | int] | int = 0,
