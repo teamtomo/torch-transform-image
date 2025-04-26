@@ -51,9 +51,9 @@ def rotate_shift_image_2d(
     """This is a wrapper function for easy 2D shifts and rotations.
 
     Rotations are specified in degrees and performed CCW around the
-    center of the image. Rotating and shifting can be performed in
-    either order. Currently, only a single shift and a single rotation
-    are allowed.
+    center of the image. Shifts are specified in number of pixels and
+    shift up/right with the origin in the lower left. Currently, only a
+    single shift and a single rotation are allowed.
 
     Parameters
     ----------
@@ -63,8 +63,9 @@ def rotate_shift_image_2d(
         The angle in degrees by which to rotate the image.
     shift : list[float | int] | tuple[float | int, float | int],
     optional
-        The number of pixels by which to shift the image. Must be a list
-        or tuple of length 2 in the form (y, x).
+        The number of pixels by which to shift the image. Positive
+        values shift up/right. Must be a list or tuple of length 2 in
+        the form (y, x).
     interpolation : Literal["nearest", "bilinear", "bicubic"], optional
         The interpolation method to use. Default is "bicubic".
     rotate_first : bool, optional
@@ -85,7 +86,9 @@ def rotate_shift_image_2d(
 
     center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
     angle_tensor = torch.as_tensor(angle, device=image.device, dtype=torch.float32)
-    shift_tensor = torch.as_tensor(shift, device=image.device, dtype=torch.float32)
+    # Because shift is applied to the coordinate grid, it must be
+    # negated to produce a positive (up/right) shift on the image.
+    shift_tensor = -torch.as_tensor(shift, device=image.device, dtype=torch.float32)
 
     if angle_tensor.numel() > 1 or shift_tensor.numel() > 2:
         raise NotImplementedError(
