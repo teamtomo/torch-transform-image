@@ -41,19 +41,18 @@ def affine_transform_image_2d(
     return result
 
 
-def rotate_shift_image_2d(
+def rotate_then_shift_image_2d(
     image: torch.Tensor,
     rotate: int | float = 0,
     shift: list[float | int] | tuple[float | int, float | int] = (0, 0),
     interpolation: Literal["nearest", "bilinear", "bicubic"] = "bicubic",
-    rotate_first: bool = True,
 ) -> torch.Tensor:
-    """This is a wrapper function for easy 2D shifts and rotations.
+    """This is a wrapper function to easily rotate and shift a 2D image.
 
     The image is rotated CCW around its center by the specified number
-    of degrees and shifted up/left by the specified number of pixels
-    (see note about direction conventions below!). Currently, only a
-    single shift and a single rotation are allowed.
+    of degrees and then shifted up/left by the specified number of
+    pixels (see note about direction conventions below!). Currently,
+    only a single shift and a single rotation are allowed.
 
     Parameters
     ----------
@@ -61,16 +60,12 @@ def rotate_shift_image_2d(
         The image to be shifted/rotated.
     angle : int | float, optional
         The angle in degrees by which to rotate the image.
-    shift : list[float | int] | tuple[float | int, float | int],
-    optional
+    shift : list[float | int] | tuple[float | int, float | int], optional
         The number of pixels by which to shift the image. Positive
         values shift up/right. Must be a list or tuple of length 2 in
         the form (y, x).
     interpolation : Literal["nearest", "bilinear", "bicubic"], optional
         The interpolation method to use. Default is "bicubic".
-    rotate_first : bool, optional
-        If True, the image is rotated first and then shifted. If False,
-        the image is shifted first and then rotated. Default is True.
 
     Returns
     -------
@@ -83,7 +78,8 @@ def rotate_shift_image_2d(
     is in the lower left (following convention in cryo-EM image
     processing). This is NOT the default for images displayed by
     matplotlib, plotly, etc. so images may be tranformed in the opposite
-    direction from expected.
+    direction from expected. If you want to tranform the other
+    direction, just reverse the sign of your rotate and shift arguments.
     """
     image_center = 0
     if rotate:
@@ -103,20 +99,75 @@ def rotate_shift_image_2d(
             "Only single angle and single shift values are supported."
             )
 
-    if rotate_first:
-        matrix = (
-            T(center_tensor) @
-            R(rotate_tensor) @
-            T(shift_tensor) @
-            T(-center_tensor)
-        )
-    else:
-        matrix = (
-            T(center_tensor) @
-            T(shift_tensor) @
-            R(rotate_tensor) @
-            T(-center_tensor)
-        )
+    matrix = T(center_tensor) @ R(rotate_tensor) @ T(shift_tensor) @ T(-center_tensor)
+
+    return affine_transform_image_2d(
+        image=image,
+        matrices=matrix,
+        interpolation=interpolation,
+        yx_matrices=True,
+    )
+
+
+def shift_then_rotate_image_2d(
+    image: torch.Tensor,
+    rotate: int | float = 0,
+    shift: list[float | int] | tuple[float | int, float | int] = (0, 0),
+    interpolation: Literal["nearest", "bilinear", "bicubic"] = "bicubic",
+):
+    """This is a wrapper function to easily shift and rotate a 2D image.
+
+    The image is shifted up/left by the specified number of pixels and
+    then rotated CCW around its center by the specified number of
+    degrees (see note about direction conventions below!). Currently,
+    only a single shift and a single rotation are allowed.
+
+    Parameters
+    ----------
+    image : torch.Tensor
+        The image to be shifted/rotated.
+    angle : int | float, optional
+        The angle in degrees by which to rotate the image.
+    shift : list[float | int] | tuple[float | int, float | int], optional
+        The number of pixels by which to shift the image. Positive
+        values shift up/right. Must be a list or tuple of length 2 in
+        the form (y, x).
+    interpolation : Literal["nearest", "bilinear", "bicubic"], optional
+        The interpolation method to use. Default is "bicubic".
+
+    Returns
+    -------
+    torch.Tensor
+        The shifted and/or rotated image.
+
+    Notes
+    -----
+    The description of operations assumes the origin (0,0) of the image
+    is in the lower left (following convention in cryo-EM image
+    processing). This is NOT the default for images displayed by
+    matplotlib, plotly, etc. so images may be tranformed in the opposite
+    direction from expected. If you want to tranform the other
+    direction, just reverse the sign of your rotate and shift arguments.
+    """
+    image_center = 0
+    if rotate:
+        h, w = image.shape[-2:]
+        image_center = dft_center(
+            image_shape=(h, w), device=image.device, fftshift=True, rfft=False
+            )
+
+    center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
+    rotate_tensor = torch.as_tensor(rotate, device=image.device, dtype=torch.float32)
+    # Because shift is applied to the coordinate grid, it must be
+    # negated to produce a positive (up/right) shift on the image.
+    shift_tensor = -torch.as_tensor(shift, device=image.device, dtype=torch.float32)
+
+    if rotate_tensor.numel() > 1 or shift_tensor.numel() > 2:
+        raise NotImplementedError(
+            "Only single angle and single shift values are supported."
+            )
+
+    matrix = T(center_tensor) @ T(shift_tensor) @ R(rotate_tensor) @ T(-center_tensor)
 
     return affine_transform_image_2d(
         image=image,

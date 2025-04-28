@@ -1,6 +1,6 @@
 import torch
 from torch_transform_image import affine_transform_image_2d, affine_transform_image_3d
-from torch_transform_image import rotate_shift_image_2d
+from torch_transform_image import rotate_then_shift_image_2d, shift_then_rotate_image_2d
 from torch_affine_utils.transforms_2d import T as T_2d, S as S_2d
 from torch_affine_utils.transforms_3d import T as T_3d, S as S_3d
 
@@ -77,17 +77,34 @@ def test_rotate_shift_image_2d():
     image[18, 14] = 1
     image = image.float()
 
-    result = rotate_shift_image_2d(
+    result = rotate_then_shift_image_2d(
         image=image,
         rotate=90,
         shift=[2, 0],
         interpolation="bicubic",
-        rotate_first=True,
     )
 
     # sanity check, array center which was 4 voxels below the dot should now be 1
     assert image[12, 12] == 0
-    assert result[12, 10] == 1
+    assert result[16, 10] == 1
+    assert result[18, 14] == 0
+
+
+def test_shift_rotate_image_2d():
+    image = torch.zeros((28, 28), dtype=torch.float32)
+    image[18, 14] = 1
+    image = image.float()
+
+    result = shift_then_rotate_image_2d(
+        image=image,
+        rotate=90,
+        shift=[2, 0],
+        interpolation="bicubic",
+    )
+
+    # sanity check, array center which was 4 voxels below the dot should now be 1
+    assert image[12, 12] == 0
+    assert result[14, 8] == 1
     assert result[18, 14] == 0
 
 
