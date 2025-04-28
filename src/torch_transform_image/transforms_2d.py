@@ -50,9 +50,9 @@ def rotate_shift_image_2d(
 ) -> torch.Tensor:
     """This is a wrapper function for easy 2D shifts and rotations.
 
-    Rotations are specified in degrees and performed CCW around the
-    center of the image. Shifts are specified in number of pixels and
-    shift up/right with the origin in the lower left. Currently, only a
+    The image is rotated CCW around its center by the specified number
+    of degrees and shifted up/left by the specified number of pixels
+    (see note about direction conventions below!). Currently, only a
     single shift and a single rotation are allowed.
 
     Parameters
@@ -76,6 +76,14 @@ def rotate_shift_image_2d(
     -------
     torch.Tensor
         The shifted and/or rotated image.
+
+    Notes
+    -----
+    The description of operations assumes the origin (0,0) of the image
+    is in the lower left (following convention in cryo-EM image
+    processing). This is NOT the default for images displayed by
+    matplotlib, plotly, etc. so images may be tranformed in the opposite
+    direction from expected.
     """
     image_center = 0
     if rotate:
