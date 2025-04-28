@@ -43,7 +43,7 @@ def affine_transform_image_2d(
 
 def rotate_shift_image_2d(
     image: torch.Tensor,
-    angle: int | float = 0,
+    rotate: int | float = 0,
     shift: list[float | int] | tuple[float | int, float | int] = (0, 0),
     interpolation: Literal["nearest", "bilinear", "bicubic"] = "bicubic",
     rotate_first: bool = True,
@@ -78,19 +78,19 @@ def rotate_shift_image_2d(
         The shifted and/or rotated image.
     """
     image_center = 0
-    if angle:
+    if rotate:
         h, w = image.shape[-2:]
         image_center = dft_center(
             image_shape=(h, w), device=image.device, fftshift=True, rfft=False
             )
 
     center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
-    angle_tensor = torch.as_tensor(angle, device=image.device, dtype=torch.float32)
+    rotate_tensor = torch.as_tensor(rotate, device=image.device, dtype=torch.float32)
     # Because shift is applied to the coordinate grid, it must be
     # negated to produce a positive (up/right) shift on the image.
     shift_tensor = -torch.as_tensor(shift, device=image.device, dtype=torch.float32)
 
-    if angle_tensor.numel() > 1 or shift_tensor.numel() > 2:
+    if rotate_tensor.numel() > 1 or shift_tensor.numel() > 2:
         raise NotImplementedError(
             "Only single angle and single shift values are supported."
             )
@@ -98,7 +98,7 @@ def rotate_shift_image_2d(
     if rotate_first:
         matrix = (
             T(center_tensor) @
-            R(angle_tensor) @
+            R(rotate_tensor) @
             T(shift_tensor) @
             T(-center_tensor)
         )
@@ -106,7 +106,7 @@ def rotate_shift_image_2d(
         matrix = (
             T(center_tensor) @
             T(shift_tensor) @
-            R(angle_tensor) @
+            R(rotate_tensor) @
             T(-center_tensor)
         )
 
