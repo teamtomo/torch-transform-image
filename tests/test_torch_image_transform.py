@@ -1,6 +1,12 @@
 import torch
-from torch_transform_image import affine_transform_image_2d, affine_transform_image_3d
-from torch_transform_image import rotate_then_shift_image_2d, shift_then_rotate_image_2d
+from torch_transform_image import (
+    affine_transform_image_2d, 
+    affine_transform_image_3d, 
+    rotate_then_shift_image_2d, 
+    shift_then_rotate_image_2d, 
+    rotate_then_shift_image_3d,
+    # shift_then_rotate_image_3d,
+)
 from torch_affine_utils.transforms_2d import T as T_2d, S as S_2d
 from torch_affine_utils.transforms_3d import T as T_3d, S as S_3d
 
@@ -106,6 +112,27 @@ def test_shift_rotate_image_2d():
     assert image[12, 12] == 0
     assert result[14, 8] == 1
     assert result[18, 14] == 0
+
+def test_rotate_shift_image_3d():
+    image = torch.zeros((28, 28, 28), dtype=torch.float32)
+    image[18, 14, 14] = 1
+    image = image.float()
+
+    result = rotate_then_shift_image_3d(
+        image=image,
+        rotate_zyx=[90, 0, 0],
+        shift_zyx=[2, 0, 0],
+        interpolation="trilinear",
+    )
+
+    # sanity check, array center which was 4 voxels below the dot should now be 1
+    assert image[14, 14, 14] == 0
+    assert result[16, 10, 14] == 1
+    assert result[18, 14, 14] == 0
+
+
+def test_shift_rotate_image_3d():
+    pass
 
 
 def test_affine_transform_image_3d_scaling():
