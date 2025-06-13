@@ -126,8 +126,8 @@ def test_rotate_shift_image_3d():
     )
 
     # sanity check, array center which was 4 voxels below the dot should now be 1
-    assert image[14, 14, 14] == 0
-    assert result[16, 10, 14] == 1
+    assert image[20, 14, 14] == 0
+    assert result[20, 14, 14] == 1
     assert result[18, 14, 14] == 0
 
 
