@@ -1,11 +1,11 @@
 import torch
 from torch_transform_image import (
-    affine_transform_image_2d, 
-    affine_transform_image_3d, 
-    rotate_then_shift_image_2d, 
-    shift_then_rotate_image_2d, 
+    affine_transform_image_2d,
+    affine_transform_image_3d,
+    rotate_then_shift_image_2d,
+    shift_then_rotate_image_2d,
     rotate_then_shift_image_3d,
-    # shift_then_rotate_image_3d,
+    shift_then_rotate_image_3d,
 )
 from torch_affine_utils.transforms_2d import T as T_2d, S as S_2d
 from torch_affine_utils.transforms_3d import T as T_3d, S as S_3d
@@ -113,26 +113,44 @@ def test_shift_rotate_image_2d():
     assert result[14, 8] == 1
     assert result[18, 14] == 0
 
+
 def test_rotate_shift_image_3d():
     image = torch.zeros((28, 28, 28), dtype=torch.float32)
-    image[18, 14, 14] = 1
+    image[8, 14, 14] = 1
     image = image.float()
+
+    max_idx = torch.nonzero(image == image.max())
+    print("Location(s) of maximum value in image:", max_idx)
 
     result = rotate_then_shift_image_3d(
         image=image,
-        rotate_zyx=[90, 0, 0],
-        shift_zyx=[2, 0, 0],
+        rotate_xyz=[0, 0, 90],
+        shifts_xyz=[5, 0, 0],
         interpolation="trilinear",
     )
-
-    # sanity check, array center which was 4 voxels below the dot should now be 1
-    assert image[20, 14, 14] == 0
-    assert result[20, 14, 14] == 1
-    assert result[18, 14, 14] == 0
+    assert image[19, 20, 14] == 0
+    assert torch.allclose(result[19, 20, 14], torch.tensor(1.0), atol=1e-6)
+    assert result[8, 14, 14] == 0
 
 
 def test_shift_rotate_image_3d():
-    pass
+    image = torch.zeros((28, 28, 28), dtype=torch.float32)
+    image[8, 8, 14] = 1
+    image = image.float()
+
+    max_idx = torch.nonzero(image == image.max())
+    print("Location(s) of maximum value in image:", max_idx)
+
+    result = shift_then_rotate_image_3d(
+        image=image,
+        rotate_xyz=[0, 0, 90],
+        shifts_xyz=[0, 5, 0],
+        interpolation="trilinear",
+    )
+
+    assert image[19, 20, 14] == 0
+    assert torch.allclose(result[13, 20, 14], torch.tensor(1.0), atol=1e-6)
+    assert result[8, 14, 14] == 0
 
 
 def test_affine_transform_image_3d_scaling():

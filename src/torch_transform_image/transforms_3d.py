@@ -41,33 +41,67 @@ def affine_transform_image_3d(
 
 def rotate_then_shift_image_3d(
     image: torch.Tensor,
-    rotate_zyx: list[float] | tuple[float, float, float] = (0, 0, 0),
-    shift_zyx: list[float] | tuple[float, float] = (0, 0),
-    interpolation: Literal["nearest", "trilinear"] = "trilinear",
+    rotate_xyz: list[float] | tuple[float, float, float] = (0, 0, 0),
+    shifts_xyz: list[float] | tuple[float, float, float] = (0, 0, 0),
+    interpolation: Literal["trilinear", "nearest"] = "trilinear",
 ) -> torch.Tensor:
     """
-    Modify from 2D function docsrings
+    This is a wrapper function to easily rotate and shift a 3D image.
+
+    The image is rotated CCW by the specified number of degrees around
+    the specified axis with the origin at the center of the image. Then,
+    image is shifted up/left by the specified number of pixels (see note
+    about shift conventions below!).
+
+    Parameters
+    ----------
+    image : torch.Tensor
+        The image to be shifted/rotated.
+    rotate_xyz : int | float, optional
+        The angles in degrees by which to rotate the image. Positive
+        values rotate CCW. Must be a list or tuple of length 3 in the
+        order (x, y, z).
+    shifts_xyz : list[float] | tuple[float, float, float], optional
+        The number of pixels by which to shift the image. Positive
+        values shift up/right. Must be a list or tuple of length 3 in
+        the form (x, y, z).
+    interpolation : Literal["trilinear", "nearest"], optional
+        The interpolation method to use. Default is "trilinear".
+
+    Returns
+    -------
+    torch.Tensor
+        The shifted and/or rotated image.
+
+    Notes
+    -----
+    Shift direction assumes the origin (0, 0, 0) of the image is in the
+    bottom left (following convention in cryo-EM image processing).
+    Matplotlib and plotly display images with y = 0 at the top by
+    default so your image may be shifted opposite of what you expect. If
+    you want to shift the other direction, just reverse the sign of
+    your shift arguments.
     """
     image_center = 0
-    if any(rotate_zyx):
+    if any(rotate_xyz):
         d, h, w = image.shape[-3:]
         image_center = dft_center(
             image_shape=(d, h, w), device=image.device, fftshift=True, rfft=False
             )
 
     center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
-    rotate_tensor = torch.as_tensor(rotate_zyx, device=image.device, dtype=torch.float32)
+    rotate_tensor = torch.as_tensor(rotate_xyz, device=image.device, dtype=torch.float32)
     # Because shift is applied to the coordinate grid, it must be
     # negated to produce a positive (up/right) shift on the image.
-    shift_tensor = -torch.as_tensor(shift_zyx, device=image.device, dtype=torch.float32)
+    shift_tensor = -torch.as_tensor(shifts_xyz, device=image.device, dtype=torch.float32)
 
     if (num_angles := rotate_tensor.numel()) != 3:
         raise ValueError(
-            f"3 angles are required but {num_angles} were supplied: {rotate_zyx}."
+            f"3 angles are required but {num_angles} were supplied: {rotate_xyz}."
         )
     if (num_shifts := shift_tensor.numel()) != 3:
         raise ValueError(
-            f"3 shifts are required but {num_shifts} were supplied: {shift_zyx}."
+            f"3 shifts are required but {num_shifts} were supplied: {shifts_xyz}."
         )
 
     matrix = (
@@ -76,6 +110,90 @@ def rotate_then_shift_image_3d(
         Ry(rotate_tensor[1]) @
         Rz(rotate_tensor[2]) @
         T(shift_tensor) @
+        T(-center_tensor)
+    )
+
+    return affine_transform_image_3d(
+        image=image,
+        matrices=matrix,
+        interpolation=interpolation,
+        zyx_matrices=True,
+    )
+
+
+def shift_then_rotate_image_3d(
+    image: torch.Tensor,
+    rotate_xyz: list[float] | tuple[float, float, float] = (0, 0, 0),
+    shifts_xyz: list[float] | tuple[float, float, float] = (0, 0, 0),
+    interpolation: Literal["nearest", "trilinear"] = "trilinear",
+) -> torch.Tensor:
+    """
+    This is a wrapper function to easily shift and rotate a 3D image.
+
+    This function is identical to `rotate_then_shift_image_3d()` except
+    for the order of transformations. The image is shifted up/left by
+    the specified number of pixels (see note about shift conventions
+    below!). Then, the image is rotated CCW by the specified number of
+    degrees around the specified axis with the origin at the center of
+    the image.
+
+    Parameters
+    ----------
+    image : torch.Tensor
+        The image to be shifted/rotated.
+    rotate_xyz : int | float, optional
+        The angles in degrees by which to rotate the image. Positive
+        values rotate CCW. Must be a list or tuple of length 3 in the
+        order (x, y, z).
+    shifts_xyz : list[float] | tuple[float, float, float], optional
+        The number of pixels by which to shift the image. Positive
+        values shift up/right. Must be a list or tuple of length 3 in
+        the order (x, y, z).
+    interpolation : Literal["trilinear", "nearest"], optional
+        The interpolation method to use. Default is "trilinear".
+
+    Returns
+    -------
+    torch.Tensor
+        The shifted and/or rotated image.
+
+    Notes
+    -----
+    Shift direction assumes the origin (0, 0, 0) of the image is in the
+    bottom left (following convention in cryo-EM image processing).
+    Matplotlib and plotly display images with y = 0 at the top by
+    default so your image may be shifted opposite of what you expect. If
+    you want to shift the other direction, just reverse the sign of your
+    shift arguments.
+    """
+    image_center = 0
+    if any(rotate_xyz):
+        d, h, w = image.shape[-3:]
+        image_center = dft_center(
+            image_shape=(d, h, w), device=image.device, fftshift=True, rfft=False
+            )
+
+    center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
+    rotate_tensor = torch.as_tensor(rotate_xyz, device=image.device, dtype=torch.float32)
+    # Because shift is applied to the coordinate grid, it must be
+    # negated to produce a positive (up/right) shift on the image.
+    shift_tensor = -torch.as_tensor(shifts_xyz, device=image.device, dtype=torch.float32)
+
+    if (num_angles := rotate_tensor.numel()) != 3:
+        raise ValueError(
+            f"3 angles are required but {num_angles} were supplied: {rotate_xyz}."
+        )
+    if (num_shifts := shift_tensor.numel()) != 3:
+        raise ValueError(
+            f"3 shifts are required but {num_shifts} were supplied: {shifts_xyz}."
+        )
+
+    matrix = (
+        T(center_tensor) @
+        T(shift_tensor) @
+        Rx(rotate_tensor[0]) @
+        Ry(rotate_tensor[1]) @
+        Rz(rotate_tensor[2]) @
         T(-center_tensor)
     )
 
