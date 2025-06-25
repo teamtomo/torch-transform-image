@@ -21,7 +21,7 @@ def affine_transform_image_2d(
     else:
         h, w = image.shape[-2:]
 
-    if not yx_matrices:
+    if yx_matrices is False:
         matrices[..., :2, :2] = (
             torch.flip(matrices[..., :2, :2], dims=(-2, -1))
         )
