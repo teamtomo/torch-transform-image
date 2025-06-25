@@ -20,7 +20,7 @@ def affine_transform_image_3d(
     else:
         d, h, w = image.shape[-3:]
 
-    if not zyx_matrices:
+    if zyx_matrices is False:
         matrices[..., :3, :3] = (
             torch.flip(matrices[..., :3, :3], dims=(-2, -1))
         )
