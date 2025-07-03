@@ -41,8 +41,8 @@ def affine_transform_image_3d(
 
 def rotate_then_shift_image_3d(
     image: torch.Tensor,
-    rotate_xyz: list[float] | tuple[float, float, float] = (0, 0, 0),
-    shifts_xyz: list[float] | tuple[float, float, float] = (0, 0, 0),
+    rotate_zyx: list[float] | tuple[float, float, float] = (0, 0, 0),
+    shifts_zyx: list[float] | tuple[float, float, float] = (0, 0, 0),
     interpolation: Literal["trilinear", "nearest"] = "trilinear",
 ) -> torch.Tensor:
     """
@@ -83,25 +83,25 @@ def rotate_then_shift_image_3d(
     your shift arguments.
     """
     image_center = 0
-    if any(rotate_xyz):
+    if any(rotate_zyx):
         d, h, w = image.shape[-3:]
         image_center = dft_center(
             image_shape=(d, h, w), device=image.device, fftshift=True, rfft=False
             )
 
     center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
-    rotate_tensor = torch.as_tensor(rotate_xyz, device=image.device, dtype=torch.float32)
+    rotate_tensor = torch.as_tensor(rotate_zyx, device=image.device, dtype=torch.float32)
     # Because shift is applied to the coordinate grid, it must be
     # negated to produce a positive (up/right) shift on the image.
-    shift_tensor = -torch.as_tensor(shifts_xyz, device=image.device, dtype=torch.float32)
+    shift_tensor = -torch.as_tensor(shifts_zyx, device=image.device, dtype=torch.float32)
 
     if (num_angles := rotate_tensor.numel()) != 3:
         raise ValueError(
-            f"3 angles are required but {num_angles} were supplied: {rotate_xyz}."
+            f"3 angles are required but {num_angles} were supplied: {rotate_zyx}."
         )
     if (num_shifts := shift_tensor.numel()) != 3:
         raise ValueError(
-            f"3 shifts are required but {num_shifts} were supplied: {shifts_xyz}."
+            f"3 shifts are required but {num_shifts} were supplied: {shifts_zyx}."
         )
 
     matrix = (
@@ -123,8 +123,8 @@ def rotate_then_shift_image_3d(
 
 def shift_then_rotate_image_3d(
     image: torch.Tensor,
-    rotate_xyz: list[float] | tuple[float, float, float] = (0, 0, 0),
-    shifts_xyz: list[float] | tuple[float, float, float] = (0, 0, 0),
+    rotate_zyx: list[float] | tuple[float, float, float] = (0, 0, 0),
+    shifts_zyx: list[float] | tuple[float, float, float] = (0, 0, 0),
     interpolation: Literal["nearest", "trilinear"] = "trilinear",
 ) -> torch.Tensor:
     """
@@ -167,25 +167,25 @@ def shift_then_rotate_image_3d(
     shift arguments.
     """
     image_center = 0
-    if any(rotate_xyz):
+    if any(rotate_zyx):
         d, h, w = image.shape[-3:]
         image_center = dft_center(
             image_shape=(d, h, w), device=image.device, fftshift=True, rfft=False
             )
 
     center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
-    rotate_tensor = torch.as_tensor(rotate_xyz, device=image.device, dtype=torch.float32)
+    rotate_tensor = torch.as_tensor(rotate_zyx, device=image.device, dtype=torch.float32)
     # Because shift is applied to the coordinate grid, it must be
     # negated to produce a positive (up/right) shift on the image.
-    shift_tensor = -torch.as_tensor(shifts_xyz, device=image.device, dtype=torch.float32)
+    shift_tensor = -torch.as_tensor(shifts_zyx, device=image.device, dtype=torch.float32)
 
     if (num_angles := rotate_tensor.numel()) != 3:
         raise ValueError(
-            f"3 angles are required but {num_angles} were supplied: {rotate_xyz}."
+            f"3 angles are required but {num_angles} were supplied: {rotate_zyx}."
         )
     if (num_shifts := shift_tensor.numel()) != 3:
         raise ValueError(
-            f"3 shifts are required but {num_shifts} were supplied: {shifts_xyz}."
+            f"3 shifts are required but {num_shifts} were supplied: {shifts_zyx}."
         )
 
     matrix = (

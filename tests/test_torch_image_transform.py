@@ -116,41 +116,35 @@ def test_shift_rotate_image_2d():
 
 def test_rotate_shift_image_3d():
     image = torch.zeros((28, 28, 28), dtype=torch.float32)
-    image[8, 14, 14] = 1
+    image[14, 8, 10] = 1
     image = image.float()
-
-    max_idx = torch.nonzero(image == image.max())
-    print("Location(s) of maximum value in image:", max_idx)
 
     result = rotate_then_shift_image_3d(
         image=image,
-        rotate_xyz=[0, 0, 90],
-        shifts_xyz=[5, 0, 0],
+        rotate_zyx=[90, 0, 0],
+        shifts_zyx=[0, 0, 5],
         interpolation="trilinear",
     )
-    assert image[19, 20, 14] == 0
-    assert torch.allclose(result[19, 20, 14], torch.tensor(1.0), atol=1e-6)
-    assert result[8, 14, 14] == 0
+    assert image[14, 14, 25] == 0
+    assert torch.allclose(result[14, 10, 25], torch.tensor(1.0), atol=1e-6)
+    assert result[14, 8, 10] == 0
 
 
 def test_shift_rotate_image_3d():
-    image = torch.zeros((28, 28, 28), dtype=torch.float32)
-    image[8, 8, 14] = 1
-    image = image.float()
-
-    max_idx = torch.nonzero(image == image.max())
-    print("Location(s) of maximum value in image:", max_idx)
+    test_image = torch.zeros((28, 28, 28), dtype=torch.float32)
+    test_image[14, 8, 10] = 1
+    test_image = test_image.float()
 
     result = shift_then_rotate_image_3d(
-        image=image,
-        rotate_xyz=[0, 0, 90],
-        shifts_xyz=[0, 5, 0],
+        image=test_image,
+        rotate_zyx=[90, 0, 0],
+        shifts_zyx=[0, 0, 5],
         interpolation="trilinear",
     )
 
-    assert image[19, 20, 14] == 0
-    assert torch.allclose(result[13, 20, 14], torch.tensor(1.0), atol=1e-6)
-    assert result[8, 14, 14] == 0
+    assert test_image[14, 15, 20] == 0
+    assert torch.allclose(result[14, 15, 20], torch.tensor(1.0), atol=1e-6)
+    assert result[14, 8, 10] == 0
 
 
 def test_affine_transform_image_3d_scaling():
