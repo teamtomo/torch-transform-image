@@ -21,6 +21,7 @@ def affine_transform_image_3d(
         d, h, w = image.shape[-3:]
 
     if not zyx_matrices:
+        matrices = matrices.clone()
         matrices[..., :3, :3] = (
             torch.flip(matrices[..., :3, :3], dims=(-2, -1))
         )
