@@ -22,7 +22,7 @@ def affine_transform_image_2d(
         h, w = image.shape[-2:]
 
     if not yx_matrices:
-        matrices = matrices.clone()  # make sure we dont modify the input tensor
+        matrices = matrices.clone()  # dont modify the input tensor
         matrices[..., :2, :2] = (
             torch.flip(matrices[..., :2, :2], dims=(-2, -1))
         )
