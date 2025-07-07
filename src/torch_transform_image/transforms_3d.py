@@ -106,9 +106,9 @@ def rotate_then_shift_image_3d(
 
     matrix = (
         T(center_tensor) @
-        Rx(rotate_tensor[0]) @
-        Ry(rotate_tensor[1]) @
-        Rz(rotate_tensor[2]) @
+        Rz(rotate_tensor[0], zyx=True) @
+        Ry(rotate_tensor[1], zyx=True) @
+        Rx(rotate_tensor[2], zyx=True) @
         T(shift_tensor) @
         T(-center_tensor)
     )
@@ -191,9 +191,9 @@ def shift_then_rotate_image_3d(
     matrix = (
         T(center_tensor) @
         T(shift_tensor) @
-        Rx(rotate_tensor[0]) @
-        Ry(rotate_tensor[1]) @
-        Rz(rotate_tensor[2]) @
+        Rz(rotate_tensor[0], zyx=True) @
+        Ry(rotate_tensor[1], zyx=True) @
+        Rx(rotate_tensor[2], zyx=True) @
         T(-center_tensor)
     )
 

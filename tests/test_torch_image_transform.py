@@ -1,3 +1,4 @@
+from unittest import result
 import torch
 from torch_transform_image import (
     affine_transform_image_2d,
@@ -126,7 +127,7 @@ def test_rotate_shift_image_3d():
         interpolation="trilinear",
     )
     assert image[14, 14, 25] == 0
-    assert torch.allclose(result[14, 10, 25], torch.tensor(1.0), atol=1e-6)
+    assert torch.allclose(result[14, 18, 13], torch.tensor(1.0), atol=1e-6)
     assert result[14, 8, 10] == 0
 
 
@@ -143,7 +144,7 @@ def test_shift_rotate_image_3d():
     )
 
     assert test_image[14, 15, 20] == 0
-    assert torch.allclose(result[14, 15, 20], torch.tensor(1.0), atol=1e-6)
+    assert torch.allclose(result[14, 13, 8], torch.tensor(1.0), atol=1e-6)
     assert result[14, 8, 10] == 0
 
 
