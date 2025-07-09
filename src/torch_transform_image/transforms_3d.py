@@ -91,9 +91,7 @@ def rotate_then_shift_image_3d(
 
     center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
     rotate_tensor = torch.as_tensor(rotate_zyx, device=image.device, dtype=torch.float32)
-    # Because shift is applied to the coordinate grid, it must be
-    # negated to produce a positive (up/right) shift on the image.
-    shift_tensor = -torch.as_tensor(shifts_zyx, device=image.device, dtype=torch.float32)
+    shift_tensor = torch.as_tensor(shifts_zyx, device=image.device, dtype=torch.float32)
 
     if (num_angles := rotate_tensor.numel()) != 3:
         raise ValueError(
@@ -112,6 +110,9 @@ def rotate_then_shift_image_3d(
         T(shift_tensor) @
         T(-center_tensor)
     )
+    # Matrix is inverted because it is applied to the coordinate grid,
+    # not the image itself.
+    matrix = torch.linalg.inv(matrix)
 
     return affine_transform_image_3d(
         image=image,
@@ -175,9 +176,7 @@ def shift_then_rotate_image_3d(
 
     center_tensor = torch.as_tensor(image_center, device=image.device, dtype=torch.float32)
     rotate_tensor = torch.as_tensor(rotate_zyx, device=image.device, dtype=torch.float32)
-    # Because shift is applied to the coordinate grid, it must be
-    # negated to produce a positive (up/right) shift on the image.
-    shift_tensor = -torch.as_tensor(shifts_zyx, device=image.device, dtype=torch.float32)
+    shift_tensor = torch.as_tensor(shifts_zyx, device=image.device, dtype=torch.float32)
 
     if (num_angles := rotate_tensor.numel()) != 3:
         raise ValueError(
@@ -196,6 +195,9 @@ def shift_then_rotate_image_3d(
         Rx(rotate_tensor[2], zyx=True) @
         T(-center_tensor)
     )
+    # Matrix is inverted because it is applied to the coordinate grid,
+    # not the image itself.
+    matrix = torch.linalg.inv(matrix)
 
     return affine_transform_image_3d(
         image=image,
