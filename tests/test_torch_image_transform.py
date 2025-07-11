@@ -1,4 +1,3 @@
-from unittest import result
 import torch
 from torch_transform_image import (
     affine_transform_image_2d,
@@ -117,7 +116,7 @@ def test_shift_rotate_image_2d():
 
 def test_rotate_shift_image_3d():
     image = torch.zeros((28, 28, 28), dtype=torch.float32)
-    image[14, 8, 10] = 1
+    image[14, 7, 14] = 1
     image = image.float()
 
     result = rotate_then_shift_image_3d(
@@ -126,26 +125,26 @@ def test_rotate_shift_image_3d():
         shifts_zyx=[0, 0, 5],
         interpolation="trilinear",
     )
-    assert image[14, 14, 25] == 0
-    assert torch.allclose(result[14, 18, 13], torch.tensor(1.0), atol=1e-6)
-    assert result[14, 8, 10] == 0
+    assert image[14, 14, 26] == 0
+    assert torch.allclose(result[14, 14, 26], torch.tensor(1.0), atol=1e-6)
+    assert result[14, 7, 14] == 0
 
 
 def test_shift_rotate_image_3d():
-    test_image = torch.zeros((28, 28, 28), dtype=torch.float32)
-    test_image[14, 8, 10] = 1
-    test_image = test_image.float()
+    image = torch.zeros((28, 28, 28), dtype=torch.float32)
+    image[14, 7, 14] = 1
+    image = image.float()
 
     result = shift_then_rotate_image_3d(
-        image=test_image,
+        image=image,
         rotate_zyx=[90, 0, 0],
         shifts_zyx=[0, 0, 5],
         interpolation="trilinear",
     )
 
-    assert test_image[14, 15, 20] == 0
-    assert torch.allclose(result[14, 13, 8], torch.tensor(1.0), atol=1e-6)
-    assert result[14, 8, 10] == 0
+    assert image[14, 19, 21] == 0
+    assert torch.allclose(result[14, 19, 21], torch.tensor(1.0), atol=1e-6)
+    assert result[14, 7, 14] == 0
 
 
 def test_affine_transform_image_3d_scaling():
