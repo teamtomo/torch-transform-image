@@ -60,7 +60,9 @@ def rotate_then_shift_image_3d(
     rotate_zyx : list[float] | tuple[float, float, float], optional
         The angles in degrees by which to rotate the image according to
         the right hand rule. Positive values rotate the image CCW. Must
-        be a list or tuple of length 3 in the order (z, y, x).
+        be a list or tuple of length 3 in the order (z, y, x). If
+        multiple angles are provided, rotations will be performed in z,
+        y, x order.
     shifts_zyx : list[float] | tuple[float, float, float], optional
         The number of pixels by which to shift the image. Positive
         values shift up/right. Must be a list or tuple of length 3 in
@@ -75,8 +77,7 @@ def rotate_then_shift_image_3d(
 
     See Also
     --------
-    shift_then_rotate_image_3d
-    transforms_2d.rotate_then_shift_image_2d
+    shift_then_rotate_image_3d transforms_2d.rotate_then_shift_image_2d
 
     Notes
     -----
@@ -105,9 +106,9 @@ def rotate_then_shift_image_3d(
     matrix = (
         T(image_center) @
         T(shifts_zyx) @
-        Rz(rotate_zyx[0], zyx=True) @
-        Ry(rotate_zyx[1], zyx=True) @
         Rx(rotate_zyx[2], zyx=True) @
+        Ry(rotate_zyx[1], zyx=True) @
+        Rz(rotate_zyx[0], zyx=True) @
         T(-image_center)
     )
     # Matrix is inverted because it is applied to the coordinate grid,
@@ -143,7 +144,9 @@ def shift_then_rotate_image_3d(
     rotate_zyx : list[float] | tuple[float, float, float], optional
         The angles in degrees by which to rotate the image according to the
         right hand rule. Positive values rotate the image CCW. Must be a
-        list or tuple of length 3 in the order (z, y, x).
+        list or tuple of length 3 in the order (z, y, x). If
+        multiple angles are provided, rotations will be performed in z,
+        y, x order.
     shifts_zyx : list[float] | tuple[float, float, float], optional
         The number of pixels by which to shift the image. Positive values
         shift up/right. Must be a list or tuple of length 3 in the form (z,
@@ -187,9 +190,9 @@ def shift_then_rotate_image_3d(
 
     matrix = (
         T(image_center) @
-        Rz(rotate_zyx[0], zyx=True) @
-        Ry(rotate_zyx[1], zyx=True) @
         Rx(rotate_zyx[2], zyx=True) @
+        Ry(rotate_zyx[1], zyx=True) @
+        Rz(rotate_zyx[0], zyx=True) @
         T(shifts_zyx) @
         T(-image_center)
     )
