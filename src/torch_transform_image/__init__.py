@@ -17,4 +17,6 @@ __all__ = [
     'rotate_then_shift_image_2d',
     'shift_then_rotate_image_2d',
     'affine_transform_image_3d',
+    'rotate_then_shift_image_3d',
+    'shift_then_rotate_image_3d',
 ]
