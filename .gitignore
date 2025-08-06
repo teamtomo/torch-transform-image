@@ -71,6 +71,7 @@ docs/_build/
 target/
 
 # Jupyter Notebook
+*dev.ipynb
 .ipynb_checkpoints
 
 # pyenv
